@@ -12,6 +12,11 @@ volatile uint32_t rising_time = 0;   // Temps du dernier front montant
 volatile uint32_t falling_time = 0; // Temps du dernier front descendant
 volatile uint32_t interval = 0;     // Intervalle mesuré
 volatile uint8_t data_ready = 0;    // Indique si une donnée est prête à être décodée
+
+volatile uint32_t time_ch1 = 0;
+volatile uint32_t time_ch2 = 0;
+volatile uint8_t state = 0;
+
 void process_signal(uint8_t bit_value);
 uint8_t is_valid_badge(uint8_t *badge_data);
 void confirm_reading(uint8_t *badge_data);
@@ -128,10 +133,6 @@ void timer_set_duty_cycle(TIM_TypeDef *TIMx, uint8_t channel, uint16_t duty_cycl
     }
 }*/
 void TIM2_IRQHandler(void) {
-    static uint32_t time_ch1 = 0;
-    static uint32_t time_ch2 = 0;
-    static uint8_t state = 0;
-
     if (TIM2->SR & TIM_SR_CC1IF) { // Interruption CH1 (PA0, front montant)
         time_ch1 = TIM2->CCR1;    // Capturer la valeur du timer pour CH1
         TIM2->SR &= ~TIM_SR_CC1IF; // Nettoyer le flag
@@ -147,9 +148,10 @@ void TIM2_IRQHandler(void) {
     // Décodage une fois les deux transitions capturées
     if (state == 0x03) { // Les deux interruptions ont été capturées
         uint32_t delta = (time_ch2 > time_ch1) ? (time_ch2 - time_ch1) : (time_ch1 - time_ch2);
-				USART2_SendString("\n CH1: ");
-				USART2_SendNumber(time_ch1);
-				
+				USART2_SendHexString((uint8_t)(time_ch1));
+				USART2_SendHexString((uint8_t)(time_ch1 >> 8));
+				USART2_SendHexString((uint8_t)(time_ch1 >> 16));
+				USART2_SendHexString((uint8_t)(time_ch1 >> 24));
         if (delta > SOME_THRESHOLD_LOW && delta < SOME_THRESHOLD_HIGH) {
             // Temps normal (téta)
             process_signal(1);
