@@ -6,9 +6,10 @@ Ce dépôt contient toutes les ressources de développement pour le projet de Sy
 
 Pour ajouter des informations à ce dépôt, suivez ces étapes :
 
-1. **Forker le Dépôt** : Cliquez sur le bouton "Fork" en haut à droite de ce dépôt pour créer une copie du dépôt sur votre compte GitHub.
+<!-- 1. **Forker le Dépôt** : Cliquez sur le bouton "Fork" en haut à droite de ce dépôt pour créer une copie du dépôt sur votre compte GitHub. -->
 
-2. **Cloner le Dépôt Forké** : Clonez le dépôt forké sur votre machine locale en utilisant la commande suivante :
+<!-- 2. **Cloner le Dépôt Forké** : Clonez le dépôt forké sur votre machine locale en utilisant la commande suivante : -->
+2. **Cloner le Dépôt** : Clonez le dépôt sur votre machine locale en utilisant la commande suivante :
     ```sh
     git clone https://github.com/dan-lara/Gestionnaire-Emprunt-Outils.git
     cd Gestionnaire-Emprunt-Outils
