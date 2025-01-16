@@ -35,8 +35,8 @@ void init_gpioB(unsigned char num_bit, unsigned int quartet_config);
 void init_gpioC(unsigned char num_bit, unsigned int quartet_config);
 
 //==================Temporisation==================
-static void delay_ms(int ms);
-static void delay_us(int us);
-static void delay_s(int s);
+void delay_ms(int ms);
+void delay_us(int us);
+void delay_s(int s);
 
 #endif // GENERAL_H

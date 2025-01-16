@@ -90,15 +90,19 @@ void init_gpioC(unsigned char num_bit, unsigned int quartet_config) {
 
 
 //=================================================================================================
-static void delay_ms(int ms) {
-    for(int i = 0; i < ms * 1000; i++)
-        __NOP();
+void delay_ms(int ms) {
+    for (int i = 0; i < ms; i++) {
+        delay_us(1000); // Délai de 1 seconde
+    }
+
 }
-static void delay_us(int us) {
+void delay_us(int us) {
     for(int i = 0; i < us; i++)
         __NOP();
 }
-static void delay_s(int s) {
-    for(int i = 0; i < s * 1000000; i++)
-        __NOP();
+void delay_s(int s) {
+    for (int i = 0; i < s; i++) {
+        delay_ms(1000); // Délai de 1 seconde
+    }
+
 }
