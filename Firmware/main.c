@@ -1,6 +1,8 @@
 #include "stm32f10x.h" // Inclure la biblioth�que STM32f10x
 #include "general.h" // Inclure la biblioth�que g�n�rale
 #include "timer.h"
+#include "uart.h"
+#include "servo.h"
 //==================Définitions==================
 #define SOME_THRESHOLD_LOW 8000    // Exemple : temps bas en µs pour téta
 #define SOME_THRESHOLD_HIGH 16000  // Exemple : temps élevé en µs pour 2teta
@@ -20,118 +22,7 @@ volatile uint8_t state = 0;
 void process_signal(uint8_t bit_value);
 uint8_t is_valid_badge(uint8_t *badge_data);
 void confirm_reading(uint8_t *badge_data);
-/*
-// Configuration de TIM2 pour g�n�rer un signal PWM avec une fr�quence sp�cifi�e
-void TIM2_PWM_Config(uint32_t frequency, uint16_t duty_cycle) {
-    RCC->APB1ENR |= RCC_APB1ENR_TIM2EN; // Activer l'horloge pour TIM2
 
-    uint32_t timer_clock = 72000000; // Fr�quence du timer (72 MHz)
-    uint32_t arr_value = (timer_clock / frequency) - 1; // Calcul de ARR pour la fr�quence
-
-    TIM2->PSC = 0;                 // Pas de division (prescaler = 0)
-    TIM2->ARR = arr_value;         // Charger ARR pour obtenir la fr�quence souhait�e
-    TIM2->CCR1 = (duty_cycle * (TIM2->ARR + 1)) / 100; // Configurer le rapport cyclique
-
-    TIM2->CCMR1 |= TIM_CCMR1_OC1M_1 | TIM_CCMR1_OC1M_2; // Mode PWM 1
-    TIM2->CCMR1 |= TIM_CCMR1_OC1PE;     // Activer la pr�charge
-    TIM2->CCER |= TIM_CCER_CC1E;        // Activer le canal 1
-    TIM2->CR1 |= TIM_CR1_ARPE;          // Activer l'auto-reload
-    TIM2->CR1 |= TIM_CR1_CEN;           // Activer le compteur
-}
-void init_timer_pwm(TIM_TypeDef *TIMx, uint8_t channel, uint32_t frequency, uint16_t duty_cycle) {
-    // Activation de l'horloge du timer
-    if (TIMx == TIM2) {
-        RCC->APB1ENR |= RCC_APB1ENR_TIM2EN;
-    } else if (TIMx == TIM3) {
-        RCC->APB1ENR |= RCC_APB1ENR_TIM3EN;
-    } else if (TIMx == TIM4) {
-        RCC->APB1ENR |= RCC_APB1ENR_TIM4EN;
-    }
-
-    uint32_t timer_clock = 72000000; // Fréquence du timer (72 MHz)
-    uint32_t arr_value = (timer_clock / frequency) - 1; // Calcul de ARR pour la fréquence
-
-    TIMx->PSC = 0;                 // Pas de division (prescaler = 0)
-    TIMx->ARR = arr_value;         // Charger ARR pour obtenir la fréquence souhaitée
-
-    // Configuration du canal sélectionné
-    switch (channel) {
-        case 1:
-            TIMx->CCR1 = (duty_cycle * (TIMx->ARR + 1)) / 100; // Configurer le rapport cyclique
-            TIMx->CCMR1 |= TIM_CCMR1_OC1M_1 | TIM_CCMR1_OC1M_2; // Mode PWM 1
-            TIMx->CCMR1 |= TIM_CCMR1_OC1PE;     // Activer la précharge
-            TIMx->CCER |= TIM_CCER_CC1E;        // Activer le canal 1
-            break;
-        case 2:
-            TIMx->CCR2 = (duty_cycle * (TIMx->ARR + 1)) / 100; // Configurer le rapport cyclique
-            TIMx->CCMR1 |= TIM_CCMR1_OC2M_1 | TIM_CCMR1_OC2M_2; // Mode PWM 1
-            TIMx->CCMR1 |= TIM_CCMR1_OC2PE;     // Activer la précharge
-            TIMx->CCER |= TIM_CCER_CC2E;        // Activer le canal 2
-            break;
-        case 3:
-            TIMx->CCR3 = (duty_cycle * (TIMx->ARR + 1)) / 100; // Configurer le rapport cyclique
-            TIMx->CCMR2 |= TIM_CCMR2_OC3M_1 | TIM_CCMR2_OC3M_2; // Mode PWM 1
-            TIMx->CCMR2 |= TIM_CCMR2_OC3PE;     // Activer la précharge
-            TIMx->CCER |= TIM_CCER_CC3E;        // Activer le canal 3
-            break;
-        case 4:
-            TIMx->CCR4 = (duty_cycle * (TIMx->ARR + 1)) / 100; // Configurer le rapport cyclique
-            TIMx->CCMR2 |= TIM_CCMR2_OC4M_1 | TIM_CCMR2_OC4M_2; // Mode PWM 1
-            TIMx->CCMR2 |= TIM_CCMR2_OC4PE;     // Activer la précharge
-            TIMx->CCER |= TIM_CCER_CC4E;        // Activer le canal 4
-            break;
-        default:
-            return; // Canal invalide
-    }
-
-    TIMx->CR1 |= TIM_CR1_ARPE;          // Activer l'auto-reload
-    TIMx->CR1 |= TIM_CR1_CEN;           // Activer le compteur
-}
-void init_timer_interruptions(TIM_TypeDef *TIMx, uint32_t frequency) {
-    // Activation de l'horloge du timer
-    if (TIMx == TIM2) {
-        RCC->APB1ENR |= RCC_APB1ENR_TIM2EN;
-    } else if (TIMx == TIM3) {
-        RCC->APB1ENR |= RCC_APB1ENR_TIM3EN;
-    } else if (TIMx == TIM4) {
-        RCC->APB1ENR |= RCC_APB1ENR_TIM4EN;
-    } else {
-        return; // Timer invalide
-    }
-
-    uint32_t timer_clock = 72000000; // Fréquence d'horloge du timer (72 MHz)
-    uint32_t arr_value = (timer_clock / frequency) - 1; // Calcul de ARR pour la fréquence
-
-    TIMx->PSC = 0;            // Pas de prescaler (division = 1)
-    TIMx->ARR = arr_value;    // Charger ARR pour définir la fréquence
-    TIMx->DIER |= TIM_DIER_UIE; // Activer les interruptions pour les mises à jour
-
-    if (TIMx == TIM2) {
-        NVIC_EnableIRQ(TIM2_IRQn); // Activer l'interruption TIM2 dans le NVIC
-    } else if (TIMx == TIM3) {
-        NVIC_EnableIRQ(TIM3_IRQn); // Activer l'interruption TIM3 dans le NVIC
-    } else if (TIMx == TIM4) {
-        NVIC_EnableIRQ(TIM4_IRQn); // Activer l'interruption TIM4 dans le NVIC
-    }
-
-    TIMx->CR1 |= TIM_CR1_CEN; // Activer le compteur
-}
-// Fonction pour modifier le rapport cyclique
-void TIM2_SetDutyCycle(uint16_t duty_cycle) {
-    if (duty_cycle <= 100)
-        TIM2->CCR1 = (duty_cycle * (TIM2->ARR + 1)) / 100; // Mettre � jour CCR1
-}
-void timer_set_duty_cycle(TIM_TypeDef *TIMx, uint8_t channel, uint16_t duty_cycle) {
-    uint32_t new_ccr = (duty_cycle * (TIMx->ARR + 1)) / 100;
-
-    switch (channel) {
-        case 1: TIMx->CCR1 = new_ccr; break;
-        case 2: TIMx->CCR2 = new_ccr; break;
-        case 3: TIMx->CCR3 = new_ccr; break;
-        case 4: TIMx->CCR4 = new_ccr; break;
-        default: return; // Canal invalide
-    }
-}*/
 void TIM2_IRQHandler(void) {
     if (TIM2->SR & TIM_SR_CC1IF) { // Interruption CH1 (PA0, front montant)
         time_ch1 = TIM2->CCR1;    // Capturer la valeur du timer pour CH1
@@ -213,16 +104,30 @@ void confirm_reading(uint8_t *badge_data) {
 		}
 }
 
+SERVO_t servo = {
+    .SERVO_GPIO = 'a',
+    .SERVO_PIN = 6,
+    .TIM_Instance = TIM3,
+    .PWM_TIM_CH = 1,
+    .MinPulse = 1.0f,  // Impulsion min (en ms)
+    .MaxPulse = 2.0f   // Impulsion max (en ms)
+};
 
 int main(void) {
-		int r = USART2_init(9600);
-		init_gpio('a', 0, GPIO_INPUT_FLOATING);
-		init_gpio('a', 1, GPIO_INPUT_FLOATING);
+		// int r = USART2_init(9600);
+		// init_gpio('a', 0, GPIO_INPUT_FLOATING);
+		// init_gpio('a', 1, GPIO_INPUT_FLOATING);
     init_gpio('a', 6, GPIO_AF_PP_50MHZ);
 		
-		TIM_INTERR_Init(TIM2, 1000000000); //init_timer_interruptions(TIM2, 1000000000);
-		TIM_PWM_Init(TIM3, 1, 125000, 50); //init_timer_pwm(TIM3, 1, 125000, 50);
+		// TIM_INTERR_Init(TIM2, 1000000000); //init_timer_interruptions(TIM2, 1000000000);
+		// TIM_PWM_Init(TIM3, 1, 125000, 50); //init_timer_pwm(TIM3, 1, 125000, 50);
+
+    SERVO_Init(servo);
     while (1) {
+        
+        SERVO_MoveTo(servo, 20); // Déplacer le servomoteur à 0 degré
+        delay_ms(10000); // Attendre 10 secondes
+        SERVO_MoveTo(servo, 50);
         // Boucle principale - peut �tre utilis�e pour modifier le rapport cyclique
     }
 }
