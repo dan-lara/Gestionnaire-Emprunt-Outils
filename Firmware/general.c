@@ -37,6 +37,7 @@ void init_gpio(unsigned char gpio_id, unsigned char num_bit, unsigned int quarte
         break;
     }
 }
+
 void init_gpioA(unsigned char num_bit, unsigned int quartet_config) {
     // Limiter quartet_config à 4 bits
     quartet_config &= 0xF;
