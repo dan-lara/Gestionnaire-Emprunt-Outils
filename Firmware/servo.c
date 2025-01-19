@@ -1,32 +1,40 @@
 #include "servo.h"
+#define TIM_CLK 72000000
 
-void SERVO_Init(SERVO_t servo)
+void SERVO_Init(SERVO_t servo) 
 {
-    // Initialisation du GPIO pour contrôler le servomoteur
+    // Inicializar o GPIO para controlar o servo
     init_gpio(servo.SERVO_GPIO, servo.SERVO_PIN, GPIO_OUT_PP_50MHZ);
 
-    // Initialisation du PWM sur le timer choisi
-    TIM_PWM_Init(servo.TIM_Instance, servo.PWM_TIM_CH, 72000000, 50);  // 50Hz pour un servomoteur standard
+    // Configurar o timer para gerar PWM de 50 Hz
+    uint32_t PSC_Value = (uint32_t)((TIM_CLK / 1000000) - 1);  // Divisor para clock de 1 MHz
+    uint32_t ARR_Value = 20000 - 1;  // ARR para 20 ms (50 Hz)
 
-    // Calcul des paramètres du timer pour la fréquence de 50Hz
-    uint32_t PSC_Value = (uint32_t)(TIM_CLK / 3276800.0);  // Diviseur pour obtenir 50Hz
-    uint32_t ARR_Value = (uint32_t)((TIM_CLK / (50.0 * (PSC_Value + 1.0))) - 1.0);  // Calcul de ARR pour 50Hz
+    // Configurar prescaler e ARR
+    servo.TIM_Instance->PSC = PSC_Value;  // Prescaler para 1 MHz
+    servo.TIM_Instance->ARR = ARR_Value;  // ARR para 20 ms
 
-    // Configuration du timer
-    servo.TIM_Instance->PSC = PSC_Value;  // Paramètre de prescaler
-    servo.TIM_Instance->ARR = ARR_Value;  // Paramètre de la valeur d'auto-reload
+
+    // Configurar o PWM para o canal apropriado
+    TIM_PWM_Init(servo.TIM_Instance, servo.PWM_TIM_CH, TIM_CLK, 50);
+
+    // Configurar posição inicial do servo (1,5 ms = centro)
+    SERVO_RawMove(servo, 1500);  // Pulso de 1,5 ms
 }
 
-
-void SERVO_MoveTo(SERVO_t servo, float angle)
+void SERVO_MoveTo(SERVO_t servo, float angle) 
 {
-    // Calculer la largeur de l'impulsion en fonction de l'angle
-    float pulse_width_ms = (angle / 180.0f) * (servo.MaxPulse - servo.MinPulse) + servo.MinPulse;
-    
-    // Convertir la largeur d'impulsion en valeur de la période pour PWM
-    uint16_t pulse_value = (uint16_t)((pulse_width_ms / 20.0) * servo.TIM_Instance->ARR);
-    
-    // Appliquer la largeur d'impulsion au timer
+    // Garantir que o ângulo esteja dentro do intervalo válido
+    if (angle < -45.0f) angle = -45.0f;
+    if (angle > 45.0f) angle = 45.0f;
+
+    // Converter o ângulo para largura de pulso
+    float pulse_width_ms = (angle / 90.0f) * (servo.MaxPulse - servo.MinPulse) + 1.5f;
+
+    // Converter largura de pulso em ticks do timer
+    uint16_t pulse_value = (uint16_t)((pulse_width_ms * 1000) / (20000.0 / (servo.TIM_Instance->ARR + 1)));
+
+    // Ajustar o PWM para o canal correto
     switch (servo.PWM_TIM_CH) {
         case 1:
             servo.TIM_Instance->CCR1 = pulse_value;
@@ -41,15 +49,14 @@ void SERVO_MoveTo(SERVO_t servo, float angle)
             servo.TIM_Instance->CCR4 = pulse_value;
             break;
         default:
-            return;  // Canal invalide
+            return;  // Canal inválido
     }
 }
 
-
 void SERVO_RawMove(SERVO_t servo, uint16_t pulse)
 {
-    // Vérification que la valeur d'impulsion est dans les limites valides
-    if (pulse >= (uint16_t)(servo.MinPulse * 1000) && pulse <= (uint16_t)(servo.MaxPulse * 1000)) {
+    // Verificar se o pulso está dentro do intervalo permitido
+    if (pulse >= 800 && pulse <= 2200) {
         switch (servo.PWM_TIM_CH) {
             case 1:
                 servo.TIM_Instance->CCR1 = pulse;
@@ -64,7 +71,7 @@ void SERVO_RawMove(SERVO_t servo, uint16_t pulse)
                 servo.TIM_Instance->CCR4 = pulse;
                 break;
             default:
-                return;  // Canal invalide
+                return;  // Canal inválido
         }
     }
 }
