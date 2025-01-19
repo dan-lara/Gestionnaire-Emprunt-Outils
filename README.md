@@ -2,10 +2,45 @@
 
 Ce dépôt contient toutes les ressources de développement pour le projet de Système de Prêt d'Outils. L'objectif est de créer un module complet pour gérer le prêt et le retour de petits outils dans des salles en libre-service, en utilisant la technologie RFID et des mécanismes de verrouillage à servomoteur.
 
-## Architecture du Projet
+# Architecture du Projet
 
+```
+└── 📁Docs
+└── 📁Firmware
+    └── main.c
+    └── adxl345.h
+    └── general.h
+    └── logs.h
+    └── manchester.h
+    └── servo.h
+    └── spi.h
+    └── timer.h
+    └── uart.h
+└── 📁Hardware
+    └── 📁Model3D
+    └── 📁SystemRFID
+└── 📁Software
+    └── admin_api.py
+    └── admin_st.py
+    └── logs_and_badges.db
+    └── tableaux.sql
+```
+Le projet a été développé sur la base de l'architecture décrite ci-dessus, chaque module étant spécifique à une tâche.
 
+## Docs
 
+Documents généraux tels que le rapport et les liens des démonstrations
+
+## Firmware
+Projet Keil avec les bibliothèques développées pour mettre en œuvre le projet. Chaque bibliothèque a sa propre fonction et peut être utilisée pour créer de nouveaux composants pour la machine afin d'augmenter sa fonctionnalité.
+
+## Matériel
+
+Contient le fichier stl pour le support du servomoteur et les fichiers de simulation pour la carte.
+
+## Logiciel
+
+Ce module contient toutes les solutions permettant la communication avec l'internet, les bases de données et la gestion par les administrateurs.
 
 
 ## Comment Contribuer
