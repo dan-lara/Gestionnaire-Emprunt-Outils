@@ -1,6 +1,6 @@
 *.uv*
-RTE/
-Objects/
-Listing/
-DebugConfig/
+#RTE/
+#Objects/
+#Listing/
+#DebugConfig/
 *.map

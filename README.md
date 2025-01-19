@@ -2,6 +2,12 @@
 
 Ce dépôt contient toutes les ressources de développement pour le projet de Système de Prêt d'Outils. L'objectif est de créer un module complet pour gérer le prêt et le retour de petits outils dans des salles en libre-service, en utilisant la technologie RFID et des mécanismes de verrouillage à servomoteur.
 
+## Architecture du Projet
+
+
+
+
+
 ## Comment Contribuer
 
 Pour ajouter des informations à ce dépôt, suivez ces étapes :
