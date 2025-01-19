@@ -4,3 +4,5 @@
 #Listing/
 #DebugConfig/
 *.map
+*.d
+*.o

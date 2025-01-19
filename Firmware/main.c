@@ -83,40 +83,6 @@ void EXTI9_5_IRQHandler(void);
 void init_boutons(void);
 uint8_t read_bouton(GPIO_TypeDef *GPIOx, uint8_t pin_number);
 
-
-#define UART_BUFFER_SIZE 128
-
-volatile char uart2_rx_buffer[UART_BUFFER_SIZE];
-volatile uint16_t uart2_rx_index = 0;
-
-void process_uart_command(const char *command);
-
-void USART2_IRQHandler(void) {
-  if (USART2->SR & USART_SR_TXE) { // Transmission prête
-    // Code pour l'envoi de données
-    USART2->DR = 'A'; // Exemple : envoie un caractère 'A'
-  }
-  if (USART2->SR & USART_SR_RXNE) { // Réception prête
-    char received = USART2->DR; // Lire les données reçues
-    USART2_SendChar(received); // Envoyer le caractère reçu
-    /*if (received == '\n' || received == '\r') { // Fin de ligne
-      uart2_rx_buffer[uart2_rx_index] = '\0'; // Terminer la chaîne
-      process_uart_command((const char *)uart2_rx_buffer); // Traiter la commande
-      uart2_rx_index = 0; // Réinitialiser l'index
-    } else {
-      if (uart2_rx_index < UART_BUFFER_SIZE - 1) {
-        uart2_rx_buffer[uart2_rx_index++] = received; // Ajouter le caractère au buffer
-      }
-    }*/
-  }
-}
-
-void process_uart_command(const char *command) {
-  // Traiter la commande reçue
-  // Exemple : afficher la commande reçue
-  printf("Commande reçue : %s\n", command);
-}
-
 //==================Main==================
 int main(void) {
   /*
@@ -226,7 +192,8 @@ int main(void) {
     if (bouton_flags[6]) {
       bouton_flags[6] = 0;
       log_data.operation = OPERATION_ASSISTANCE;
-      send_log(&log_data);
+      send_log(&log_data);      
+			send_log3(&log_data);
     }
     if (bouton_flags[5]) {
       bouton_flags[5] = 0;
@@ -234,7 +201,6 @@ int main(void) {
       choisir = request_badge_validation(badge_id, MACHINE_ID);
       choisir = 1;
       log_data.operation = OPERATION_EMPRUNT;
-      //send_log(&log_data);
     }
     if (bouton_flags[4] ) {
       bouton_flags[4] = 0;
@@ -243,6 +209,7 @@ int main(void) {
       set_servo_angle(1500);
       set_log_timestamp(&log_data, get_current_time_ms());
       send_log(&log_data);
+			send_log3(&log_data);
     }
   }
 }
