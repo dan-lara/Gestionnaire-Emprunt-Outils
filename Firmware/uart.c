@@ -77,3 +77,75 @@ UART_Status_t USART2_WriteFIFO(uint8_t data) {
     }
     return UART_BUFFER_FULL;
 }
+UART_Status_t USART3_init(uint32_t baudRate) {
+    RCC->APB2ENR |= (1 << 4);  // Activer l'horloge GPIOB
+    RCC->APB1ENR |= (1 << 18); // Activer l'horloge USART3
+        
+    init_gpio('b', 10, GPIO_AF_PP_50MHZ); // Configurer PB10 en mode alternatif push-pull 50MHz
+    
+    init_gpio('b', 11, GPIO_INPUT_FLOATING); // Configurer PB11 en entrée flottante
+    uint32_t brrValue = 36000000 / baudRate;
+    USART3->BRR = brrValue; // Baudrate 9600, horloge APB1 36 MHz
+    USART3->CR1 |= (1 << 2) | (1 << 3); // Activer le récepteur et l'émetteur
+    USART3->CR1 |= (1 << 13); // Activer USART3
+
+    // Initialisation de la FIFO
+    uartFifo.buffer = fifoBuffer;
+    uartFifo.size = DEFAULT_FIFO_SIZE;
+    uartFifo.writePtr = 0;
+    uartFifo.readPtr = 0;
+    uartFifo.available = DEFAULT_FIFO_SIZE;
+
+    return UART_OK;
+}
+UART_Status_t USART3_SendChar(char c) {
+    // Attendre que le registre d'émission soit vide
+    while (!(USART3->SR & UART_TXE_FLAG));
+    USART3->DR = c;
+    return UART_OK;
+}
+
+UART_Status_t USART3_SendString(const char* str) {
+    while (*str)
+        if (USART3_SendChar(*str++) != UART_OK) 
+            return UART_ERROR;
+    return UART_OK;
+}
+
+UART_Status_t USART3_SendHexString(uint8_t data) {
+    char hexStr[3];
+    sprintf(hexStr, "%02X", data);
+    return USART3_SendString(hexStr);
+}
+
+UART_Status_t USART3_ProcessCharFIFO() {
+    // Vérifier s'il y a des données à envoyer
+    if (uartFifo.readPtr != uartFifo.writePtr) {
+        USART3_SendChar(uartFifo.buffer[uartFifo.readPtr]);
+        uartFifo.readPtr = (uartFifo.readPtr + 1) % uartFifo.size;
+        uartFifo.available++;
+        return UART_OK;
+    }
+    return UART_BUFFER_EMPTY;
+}
+
+UART_Status_t USART3_ProcessHexFIFO() {
+    // Vérifier s'il y a des données à envoyer
+    if (uartFifo.readPtr != uartFifo.writePtr) {
+        USART3_SendHexString(uartFifo.buffer[uartFifo.readPtr]);
+        uartFifo.readPtr = (uartFifo.readPtr + 1) % uartFifo.size;
+        uartFifo.available++;
+        return UART_OK;
+    }
+    return UART_BUFFER_EMPTY;
+}
+
+UART_Status_t USART3_WriteFIFO(uint8_t data) {
+    if (uartFifo.available) {
+        uartFifo.buffer[uartFifo.writePtr] = data;
+        uartFifo.writePtr = (uartFifo.writePtr + 1) % DEFAULT_FIFO_SIZE;  // Rebouclage du pointeur d'écriture
+        uartFifo.available--;
+        return UART_OK;
+    }
+    return UART_BUFFER_FULL;
+}

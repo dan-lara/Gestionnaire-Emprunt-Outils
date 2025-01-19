@@ -30,6 +30,14 @@ UART_Status_t USART2_ProcessCharFIFO();
 UART_Status_t USART2_ProcessHexFIFO();
 UART_Status_t USART2_WriteFIFO(uint8_t data);
 
+UART_Status_t USART3_init(uint32_t baudRate);
+UART_Status_t USART3_SendChar(char c);
+UART_Status_t USART3_SendString(const char* str);
+UART_Status_t USART3_SendHexString(uint8_t value);
+UART_Status_t USART3_ProcessCharFIFO();
+UART_Status_t USART3_ProcessHexFIFO();
+UART_Status_t USART3_WriteFIFO(uint8_t data);
+
 // Définitions privées
 #define UART_TXE_FLAG     (1<<7)  // Bit 7 de SR (TXE)
 #define DEFAULT_FIFO_SIZE 64      // Taille par défaut du buffer
