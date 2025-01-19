@@ -275,7 +275,7 @@ uint8_t read_bouton(GPIO_TypeDef *GPIOx, uint8_t pin_number) {
 //==================Temporisation==================
 void set_log_timestamp(LogType *log, uint32_t current_time) {
   // Fonction pour définir le timestamp du log
-  // Exemple : "16012025123045" (JJMMYYYYHHMMSS)
+  // Exemple : "16012025123045" (JJMMAAAAHHMMSS)
   char timestamp_str[15];
   sprintf(timestamp_str, "%010lu", current_time);
   log_data.timestamp = timestamp_str;

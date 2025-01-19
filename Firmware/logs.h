@@ -26,7 +26,7 @@ typedef struct {
     uint8_t id_caisse;       // ID de la caisse
     uint8_t id_tool;         // ID de l'outil
     AnomalieType type_anomalie;   // Type d'anomalie (seulement pour OPERATION_ANOMALIE)
-    const char* timestamp;   // Date et heure au format JJMMYYYYHHMMSS
+    char* timestamp;   // Date et heure au format JJMMYYYYHHMMSS
 } LogType;
 
 UART_Status_t send_log(const LogType* log);
