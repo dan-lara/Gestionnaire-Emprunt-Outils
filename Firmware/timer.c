@@ -2,7 +2,9 @@
 
 void TIM_PWM_Init(TIM_TypeDef *TIMx, uint8_t channel, uint32_t frequency, uint16_t duty_cycle) {
     // Activation de l'horloge du timer
-    if (TIMx == TIM2) {
+    if (TIMx == TIM1) {
+        RCC->APB2ENR |= RCC_APB2ENR_TIM1EN;
+    } else if (TIMx == TIM2) {
         RCC->APB1ENR |= RCC_APB1ENR_TIM2EN;
     } else if (TIMx == TIM3) {
         RCC->APB1ENR |= RCC_APB1ENR_TIM3EN;
@@ -22,7 +24,7 @@ void TIM_PWM_Init(TIM_TypeDef *TIMx, uint8_t channel, uint32_t frequency, uint16
             TIMx->CCR1 = (duty_cycle * (TIMx->ARR + 1)) / 100; // Configurer le rapport cyclique
             TIMx->CCMR1 |= TIM_CCMR1_OC1M_1 | TIM_CCMR1_OC1M_2; // Mode PWM 1
             TIMx->CCMR1 |= TIM_CCMR1_OC1PE;     // Activer la précharge
-            TIMx->CCER |= TIM_CCER_CC1E;        // Activer le canal 1
+            TIMx->CCER |= (1<<0);        // Activer le canal 1         
             break;
         case 2:
             TIMx->CCR2 = (duty_cycle * (TIMx->ARR + 1)) / 100; // Configurer le rapport cyclique
@@ -48,6 +50,7 @@ void TIM_PWM_Init(TIM_TypeDef *TIMx, uint8_t channel, uint32_t frequency, uint16
 
     TIMx->CR1 |= TIM_CR1_ARPE;          // Activer l'auto-reload
     TIMx->CR1 |= TIM_CR1_CEN;           // Activer le compteur
+    TIMx->BDTR |= (1 << 15);            // Activer la sortie principale
 }
 void TIM_INTERR_Init(TIM_TypeDef *TIMx, uint32_t frequency) {
     // Activation de l'horloge du timer
