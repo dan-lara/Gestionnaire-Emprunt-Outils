@@ -79,6 +79,16 @@ def read_root():
     return {"message": "Bienvenue sur l'API de gestion des emprunteurs", "status": "OK"}
 
 # Routes
+@app.get("/badges", tags=["badges"])
+def get_badges():
+    """Récupérer tous les badges."""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM badges")
+    badges = cursor.fetchall()
+    conn.close()
+
+    return [dict(badge) for badge in badges]
 @app.get("/badges/{id_badge}", tags=["badges"])
 def check_badge(id_badge: str):
     """Vérifier si un badge existe et retourner son statut."""

@@ -26,7 +26,7 @@ def connexion():
 
 def afficher_journaux():
     """Afficher tous les journaux."""
-    st.title("Journaux")
+    st.title("Logs")
 
     réponse = requests.get(f"{API_BASE_URL}/logs")
     if réponse.status_code == 200:
@@ -71,6 +71,15 @@ def gérer_badges():
         else:
             st.error("Échec de l'ajout du badge")
 
+    # Afficher tous les badges
+    st.write("### Liste des Badges")
+    réponse = requests.get(f"{API_BASE_URL}/badges")
+    if réponse.status_code == 200:
+        badges = réponse.json()
+        st.table(badges)
+    else:
+        st.error("Échec de la récupération des badges")
+
 # Application principale
 if "connecté" not in st.session_state:
     st.session_state["connecté"] = False
@@ -79,9 +88,9 @@ if not st.session_state["connecté"]:
     connexion()
 else:
     st.sidebar.title("Navigation")
-    page = st.sidebar.radio("Aller à", ["Journaux", "Gérer les Badges"])
+    page = st.sidebar.radio("Aller à", ["Logs", "Gérer les Badges"])
 
-    if page == "Journaux":
+    if page == "Logs":
         afficher_journaux()
     elif page == "Gérer les Badges":
         gérer_badges()
