@@ -2,6 +2,41 @@
 
 Ce dépôt contient toutes les ressources de développement pour le projet de Système de Prêt d'Outils. L'objectif est de créer un module complet pour gérer le prêt et le retour de petits outils dans des salles en libre-service, en utilisant la technologie RFID et des mécanismes de verrouillage à servomoteur.
 
+## Lancer le Projet
+
+Pour lancer le projet, suivez les instructions ci-dessous :
+
+### Firmware
+
+1. **Keil v5** : Ouvrez le projet dans Keil v5 pour compiler et téléverser le firmware sur le microcontrôleur. Le fichier du projet se trouve dans le dossier `Firmware/`.
+
+2. **ArduinoIDE** : Ouvrez le projet dans ArduinoIDE pour compiler et téléverser le firmware sur l'ESP32. Le fichier du projet se trouve dans le dossier `Software/firmware_esp/`.
+
+### Software
+
+1. **Naviguer vers le répertoire Software** :
+    ```sh
+    git clone https://github.com/dan-lara/Gestionnaire-Emprunt-Outils.git
+    cd Gestionnaire-Emprunt-Outils/Software
+    ```
+
+2. **Installer les dépendances** : Créez un environnement virtuel et installez les dépendances nécessaires :
+    ```sh
+    python -m venv venv
+    source venv/bin/activate  # Sur Windows, utilisez `venv\Scripts\activate`
+    pip install -r requirements.txt
+    ```
+
+3. **Lancer l'interface Streamlit** :
+    ```sh
+    streamlit run .\admin_st.py --reload
+    ```
+
+4. **Lancer l'API avec Uvicorn** :
+    ```sh
+    uvicorn admin_api:app --host 0.0.0.0 --port 8000 --reload
+    ```
+
 # Architecture du Projet
 
 ```
@@ -29,19 +64,29 @@ Le projet a été développé sur la base de l'architecture décrite ci-dessus, 
 
 ## Docs
 
-Documents généraux tels que le rapport et les liens des démonstrations
+Ce répertoire contient des documents généraux tels que le rapport de projet, les manuels d'utilisation, et les liens vers les démonstrations vidéo. Ces documents fournissent une vue d'ensemble du projet, des instructions détaillées pour l'installation et l'utilisation, ainsi que des exemples pratiques.
 
 ## Firmware
-Projet Keil avec les bibliothèques développées pour mettre en œuvre le projet. Chaque bibliothèque a sa propre fonction et peut être utilisée pour créer de nouveaux composants pour la machine afin d'augmenter sa fonctionnalité.
+
+Le répertoire Firmware contient le projet Keil avec les bibliothèques développées pour mettre en œuvre le projet. Chaque fichier source et en-tête (.c et .h) a une fonction spécifique, comme la gestion des capteurs, la communication SPI, le contrôle des servomoteurs, etc. Ces bibliothèques peuvent être réutilisées ou étendues pour ajouter de nouvelles fonctionnalités à la machine.
 
 ## Matériel
 
-Contient le fichier stl pour le support du servomoteur et les fichiers de simulation pour la carte.
+Ce répertoire contient les fichiers nécessaires pour le matériel physique du projet. Le dossier Model3D inclut les fichiers STL pour l'impression 3D des supports de servomoteurs et autres composants. Le dossier SystemRFID contient les schémas et les fichiers de simulation pour la carte RFID, permettant de comprendre et de reproduire le système de verrouillage basé sur la technologie RFID.
+
+Voici une image montrant le montage complet du système de prêt d'outils :
+![Montage du Système](Docs/montage.jpeg)
+
 
 ## Logiciel
 
-Ce module contient toutes les solutions permettant la communication avec l'internet, les bases de données et la gestion par les administrateurs.
+Le répertoire Software contient les scripts et les bases de données nécessaires pour la gestion du système. Les fichiers Python (admin_api.py et admin_st.py) gèrent les API et les interfaces administratives. Le fichier logs_and_badges.db est la base de données SQLite contenant les logs d'emprunt et les informations sur les badges RFID. Le fichier tableaux.sql contient les scripts SQL pour créer et gérer les tables de la base de données. Ces composants permettent la communication avec l'internet, la gestion des données et l'administration du système.
 
+
+## Description de l'Architecture
+Voici une image illustrant l'architecture complète du système :
+
+![Architecture du Système](Docs/arch.jpeg)
 
 ## Comment Contribuer
 
